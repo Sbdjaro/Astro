@@ -4,8 +4,6 @@ import pandas as pd
 
 
 from astropy.table import Table
-dat = Table.read('example1.fits', format='fits')
-df = dat.to_pandas()
 
 dat = Table.read('COSMOS_IRAC.fits', format='fits')
 df_irac = dat.to_pandas()
@@ -22,3 +20,7 @@ c = SkyCoord(ra = df_opt["OPT_RA"]*u.degree,dec = df_opt["OPT_DEC"]*u.degree)
 catalog = SkyCoord(ra = df_irac["IRAC_RA"]*u.degree,dec = df_irac["IRAC_DEC"]*u.degree)
 idx,d2d,d3d = c.match_to_catalog_sky(catalog)
 idx1,idxcatalog,d2d1,d3d1 = catalog.search_around_sky(c,0.001*u.deg)
+
+stack = np.concatenate([idx1[:,None],idxcatalog[:,None]],axis=1)
+pad = pd.DataFrame(stack,columns = ["first","second"])
+pad = pad.join(df_irac,on = "second").join(df_opt,on = "first").drop(columns = ["first","second"])
